@@ -1,11 +1,12 @@
 import warnings
 warnings.filterwarnings('ignore')
-
+import statsmodels.api as sm
 import pandas as pd
 import numpy as np
-
+import math
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 
 from env import host, user, password
 
@@ -50,6 +51,8 @@ def wrangle_zillow():
     df.Tax_Value = df.Tax_Value.astype(float)
 
     return df
+    
+df = wrangle_zillow()
 
 def split_my_data(x, y, train_pct):
 
@@ -68,20 +71,59 @@ def standard_scaler(train,test):
 
     return train_scaled, test_scaled, scaler
 
+#baseline_df=pd.DataFrame({'actual':series})
 
-def baseline_mean_errors(y):
+    
+def baseline_mean_errors(df,column):
+  
+    df['baseline'] = df[column].mean()
+
+    n = len(df)
+   
+    SSE_base = sum((df.baseline - df[column])**2)
+    MSE_base = SSE_base / n
+    RMSE_base = math.sqrt(MSE_base)
+
+    return SSE_base, MSE_base, RMSE_base, n
+        
+
+def get_yhat(df,x_col,y_col):
+    lr=LinearRegression()
+    lr.fit(df[x_col],df[[y_col]])
+    predictions=lr.predict(df[x_col])
+    predictions_df = pd.DataFrame({'yhat':predictions.flatten()})
+    
+    return predictions_df
+
+
+def get_model_errors(yhat,y):
+
+    df['baseline'] = df[column].mean()
+    n = len(df)
+   
+    SSE_base = sum((yhat - y)**2)
+    MSE_base = SSE_base / n
+    RMSE_base = math.sqrt(MSE_base)
+
+    return SSE_base, MSE_base, RMSE_base, n
+
+
+def regression_errors(y, yhat):
     '''
-    Returns a dictionary containing various regression error metrics for a
-    baseline model, that is, a model that uses the mean of y as the prediction.
+    Returns a dictionary containing various regression error metrics.
     '''
-    yhat = y.mean()
     n = y.size
     residuals = yhat - y
+    ybar = y.mean()
 
-    sse = sum(residuals ** 2)
+    sse = sum(residuals**2)
+
+    ess = ((yhat - ybar)**2).sum()
 
     return {
-        'sse: ' + sse,
-        'mse: ' + sse / n,
-        'rmse: ' + sqrt(sse / n),
+        'sse': sse,
+        'mse': sse / n,
+        'rmse': math.sqrt(sse / n),
+        'ess': ess,
+        'tss': ess + sse,
     }
