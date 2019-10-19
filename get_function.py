@@ -84,6 +84,8 @@ def baseline_mean_errors(df,column):
     MSE_base = SSE_base / n
     RMSE_base = math.sqrt(MSE_base)
 
+    df.drop(columns='baseline')
+
     return SSE_base, MSE_base, RMSE_base, n
         
 
@@ -96,34 +98,37 @@ def get_yhat(df,x_col,y_col):
     return predictions_df
 
 
-def get_model_errors(yhat,y):
+# def get_model_errors(yhat,y):
 
-    df['baseline'] = df[column].mean()
-    n = len(df)
+#     df['baseline'] = df[column].mean()
+#     n = len(df)
    
-    SSE_base = sum((yhat - y)**2)
-    MSE_base = SSE_base / n
-    RMSE_base = math.sqrt(MSE_base)
+#     SSE_base = sum((yhat - y)**2)
+#     MSE_base = SSE_base / n
+#     RMSE_base = math.sqrt(MSE_base)
 
-    return SSE_base, MSE_base, RMSE_base, n
+#     return SSE_base, MSE_base, RMSE_base, n
 
 
 def regression_errors(y, yhat):
     '''
     Returns a dictionary containing various regression error metrics.
     '''
-    n = y.size
-    residuals = yhat - y
-    ybar = y.mean()
+    yhat['y']=y.reset_index(drop=True)
+    yhat['residual']=yhat.yhat-yhat.y
+    
+    ybar = yhat['y'].mean()
+    n = len(df)
 
-    sse = sum(residuals**2)
-
+    sse = sum(yhat.residual**2)
+    mse = sse / n
+    rmse = math.sqrt(sse / n)
     ess = ((yhat - ybar)**2).sum()
+    tss = ess + sse
+    
+    return sse, mse, rmse, ess, tss
 
-    return {
-        'sse': sse,
-        'mse': sse / n,
-        'rmse': math.sqrt(sse / n),
-        'ess': ess,
-        'tss': ess + sse,
-    }
+# yhat = Size_yhat
+# y = y_train.Tax_Value.reset_index(drop=True)
+# yhat['y']=y_train.Tax_Value.reset_index(drop=True)
+# yhat['residual']=yhat.yhat-yhat.y
