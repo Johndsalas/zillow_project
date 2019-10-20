@@ -3,6 +3,7 @@ warnings.filterwarnings('ignore')
 import statsmodels.api as sm
 import pandas as pd
 import numpy as np
+from scipy import stats
 import math
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
