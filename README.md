@@ -6,7 +6,7 @@ Create a model that can be used to predict the values of single unit properties 
 
 Secondary goal:
 
-Determine what States and Counties those properties are in and create a distribution of tax rates for each county
+Determine what States and Counties those properties are in and create a distribution for tax rates in each county
 
 Project will contain:
 
